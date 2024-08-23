@@ -4,5 +4,5 @@ output "aws_region" {
 }
 output "jumphost_public_ip" {
   description = "Public IP address of the EC2 jumphost"
-  value       = aws_instance.pavan.id
+  value       = aws_instance.pavan.public_ip
 }

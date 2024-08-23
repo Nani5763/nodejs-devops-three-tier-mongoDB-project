@@ -10,7 +10,7 @@ resource "aws_instance" "pavan" {
     root_block_device {
       volume_size = 30
     }
-    user_data = templatefile(".Install_tools.sh",{})
+    user_data = templatefile("./Install_tools.sh", {})
 
     tags = {
       Name = "Main-Project"
