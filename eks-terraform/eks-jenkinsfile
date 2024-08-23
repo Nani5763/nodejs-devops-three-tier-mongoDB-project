@@ -4,22 +4,40 @@ pipeline {
     stages {
         stage('git clone') {
             steps {
-                git branch: 'main', url: 'https://github.com/Nani5763/Terraform_CICD.git'
+                git branch: 'main', url: 'https://github.com/Nani5763/fpjt-project.git'
             }
         }
-        stage('init') {
+        stage('Terraform version') {
             steps {
-                sh 'terraform init'
+                   sh 'terraform --version' 
             }
         }
-        stage('plan') {
+        stage('Terraform init') {
             steps {
-                sh 'terraform plan'
+                dir ('eks-terraform'){
+                  sh 'terraform init --reconfigure'  
+                }
             }
         }
-        stage('apply') {
+        stage('Terraform validate') {
             steps {
-                sh 'terraform apply -auto-approve'
+                dir ('eks-terraform'){
+                  sh 'terraform validate'  
+                }
+            }
+        }
+        stage('Terraform plan') {
+            steps {
+                dir ('eks-terraform'){
+                  sh 'terraform plan'  
+                }
+            }
+        }
+        stage('Terraform apply/destroy') {
+            steps {
+                dir ('eks-terraform'){
+                  sh 'terraform ${action} -auto-approve'  
+                }
             }
         }
     }
