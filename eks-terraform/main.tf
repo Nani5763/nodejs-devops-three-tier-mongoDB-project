@@ -89,7 +89,7 @@ resource "aws_iam_role_policy_attachment" "AmazonEC2ContainerRegistryReadOnly" {
   role = aws_iam_role.worker.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
 }
-resource "aws_iam_role_policy_attachment" "AmazonS3ReadOnlyAccess" {
+resource "aws_iam_role_policy_attachment" "s3" {
   role = aws_iam_role.worker.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
 }
