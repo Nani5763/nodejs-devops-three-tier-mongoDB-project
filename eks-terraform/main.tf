@@ -112,21 +112,21 @@ data "aws_vpc" "main" {
     }
 }
 data "aws_subnet" "subnet-1" {
-  vpc_id = data.aws_vpc.main
+  vpc_id = data.aws_vpc.main.id
   filter {
     name = "tag:name"
     values = [ "public-subnet-1" ]
   }
 }
 data "aws_subnet" "subnet-2" {
-  vpc_id = data.aws_vpc.main
+  vpc_id = data.aws_vpc.main.id
   filter {
     name = "tag:name"
     values = [ "public-subnet-2" ]
   }
 }
 data "aws_security_group" "selector" {
-  vpc_id = data.aws_vpc.main
+  vpc_id = data.aws_vpc.main.id
   filter {
     name = "tag:name"
     values = [ "project-sg" ]
