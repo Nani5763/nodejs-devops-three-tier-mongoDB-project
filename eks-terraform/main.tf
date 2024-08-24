@@ -125,7 +125,7 @@ data "aws_subnet" "subnet-2" {
     values = [ "public-subnet-2" ]
   }
 }
-data "aws_security_group" "selector" {
+data "aws_security_group" "selected" {
   vpc_id = data.aws_vpc.main.id
   filter {
     name = "tag:name"
@@ -159,7 +159,7 @@ resource "aws_eks_node_group" "node-grp" {
     instance_types = ["t2.small"]
     remote_access {
       ec2_ssh_key = "provisioner"
-      source_security_group_ids = [ data.aws_security_group.selector.id ]
+      source_security_group_ids = [ data.aws_security_group.selected.id ]
     }
     labels = {
       env = "dev"
