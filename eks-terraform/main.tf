@@ -156,7 +156,7 @@ resource "aws_eks_node_group" "node-grp" {
     subnet_ids = [ data.aws_subnet.subnet-1.id, data.aws_subnet.subnet-2.id ]
     capacity_type = "ON DEMAND"
     disk_size = 20
-    instance_types = [ t2.small ]
+    instance_types = ["t2.small"]
     remote_access {
       ec2_ssh_key = "provisioner"
       source_security_group_ids = [ data.aws_security_group.selector.id ]
