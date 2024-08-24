@@ -9,11 +9,11 @@ resource "aws_iam_role" "master" {
     "Version" : "2012-10-17",
     "Statement" : [
       {
-        "Action" : "sts:AssumeRole",
         "Effect" : "Allow",
         "Principal" : {
-          "Service" : "ec2.amazonaws.com"
-        }
+          "Service" : "eks.amazonaws.com"
+        },
+        "Action" : "sts:AssumeRole",
       }
     ]
   })
