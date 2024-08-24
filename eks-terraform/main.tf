@@ -140,7 +140,7 @@ resource "aws_eks_cluster" "eks" {
     subnet_ids = [ data.aws_subnet.subnet-1.id, data.aws_subnet.subnet-2.id ]
   }
   tags = {
-    Name = MY_EKS
+    Name = "MY_EKS"
   }
   depends_on = [ 
     aws_iam_role_policy_attachment.AmazonEKSClusterPolicy,
