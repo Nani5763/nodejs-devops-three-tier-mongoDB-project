@@ -35,14 +35,13 @@ pipeline {
         stage('Quality Check') {
             steps {
                 script {
-                    timeout(time: 15, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token'
+                    timeout(time: 15, unit: 'MINUTES'){
+                        waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token'
+                    }
+ 
                 }
             }
         }
-    }
-}
-
         stage('OWASP Dependency-Check Scan') {
             steps {
                 dir('Application-Code/frontend') {
