@@ -25,7 +25,7 @@ pipeline {
         stage('Sonarqube Analysis') {
             steps {
                 dir('Application-Code/backend') {
-                    withSonarQubeEnv('sonar-server') {
+                    withSonarQubeEnv('sonarqube') {
                         sh ''' $SCANNER_HOME/bin/sonarqube \
                         -Dsonar.projectName=three-tier-backend \
                         -Dsonar.projectKey=three-tier-backend '''
