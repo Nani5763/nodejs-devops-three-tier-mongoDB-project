@@ -26,7 +26,7 @@ pipeline {
             steps {
                 dir('Application-Code/backend') {
                     withSonarQubeEnv('sonarqube') {
-                        sh ''' $SCANNER_HOME/bin/sonarqube \
+                        sh ''' $SCANNER_HOME/bin/sonar-scanner \
                         -Dsonar.projectName=three-tier-backend \
                         -Dsonar.projectKey=three-tier-backend '''
                     }
