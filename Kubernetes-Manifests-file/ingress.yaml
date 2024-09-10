@@ -8,7 +8,7 @@ metadata:
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
 spec:
-  ingressClassName: alb # Updated from nginx to alb for AWS ALB support
+  ingressClassName: nginx
   rules:
     - host: bonam.co.in
       http:
