@@ -13,7 +13,7 @@ spec:
     - http:
         paths:
           - 
-            host: yyy.bonam.co.in
+            # host: yyy.bonam.co.in
             path: /
             pathType: Prefix
             backend:
