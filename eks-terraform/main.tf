@@ -208,7 +208,8 @@ resource "aws_iam_openid_connect_provider" "eks_oidc_provider" {
 resource "aws_iam_policy" "alb_controller_policy" {
   name        = "ALBControllerPolicy"
   description = "IAM policy for the AWS Load Balancer Controller"
-  policy      = file("${path.module}/alb-controller-policy.json")
+  policy = file("${path.module}/policies/alb-controller-policy.json")
+
 }
 
 # Create IAM Role for AWS Load Balancer Controller
