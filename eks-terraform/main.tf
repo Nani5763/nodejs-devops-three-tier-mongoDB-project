@@ -1,10 +1,11 @@
 provider "aws" {
   region = "us-east-1"
 }
-#Create IAM Role for EKS
+
+# Create IAM Role for EKS
 resource "aws_iam_role" "master" {
   name = "pavan-eks-master"
-  
+
   assume_role_policy = jsonencode({
     "Version" : "2012-10-17",
     "Statement" : [
@@ -13,26 +14,29 @@ resource "aws_iam_role" "master" {
         "Principal" : {
           "Service" : "eks.amazonaws.com"
         },
-        "Action" : "sts:AssumeRole",
+        "Action" : "sts:AssumeRole"
       }
     ]
   })
 }
-#Attach IAM role Policy for master
+
+# Attach IAM role Policy for master
 resource "aws_iam_role_policy_attachment" "AmazonEKSClusterPolicy" {
-  role = aws_iam_role.master.name
+  role       = aws_iam_role.master.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
 }
+
 resource "aws_iam_role_policy_attachment" "AmazonEKSServicePolicy" {
-  role = aws_iam_role.master.name
+  role       = aws_iam_role.master.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
 }
+
 resource "aws_iam_role_policy_attachment" "AmazonEKSVPCResourceController" {
-  role = aws_iam_role.master.name
+  role       = aws_iam_role.master.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
 }
 
-#Create IAM role for worker node
+# Create IAM role for worker node
 resource "aws_iam_role" "worker" {
   name = "pavan-eks-worker"
 
@@ -49,7 +53,8 @@ resource "aws_iam_role" "worker" {
     ]
   })
 }
-#Create IAM policy for autoscaler
+
+# Create IAM policy for autoscaler
 resource "aws_iam_policy" "autoscaler" {
   name = "pavan-eks-autoscaler-policy"
 
@@ -72,69 +77,79 @@ resource "aws_iam_policy" "autoscaler" {
     ]
   })
 }
-#Attach IAM role policy attachment for worker node
+
+# Attach IAM role policy attachment for worker node
 resource "aws_iam_role_policy_attachment" "AmazonEKSWorkerNodePolicy" {
-  role = aws_iam_role.worker.name
+  role       = aws_iam_role.worker.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
 }
+
 resource "aws_iam_role_policy_attachment" "AmazonEKS_CNI_Policy" {
-  role = aws_iam_role.worker.name
+  role       = aws_iam_role.worker.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
 }
+
 resource "aws_iam_role_policy_attachment" "AmazonSSMManagedInstanceCore" {
-  role = aws_iam_role.worker.name
+  role       = aws_iam_role.worker.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
+
 resource "aws_iam_role_policy_attachment" "AmazonEC2ContainerRegistryReadOnly" {
-  role = aws_iam_role.worker.name
+  role       = aws_iam_role.worker.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
 }
+
 resource "aws_iam_role_policy_attachment" "s3" {
-  role = aws_iam_role.worker.name
+  role       = aws_iam_role.worker.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
 }
+
 resource "aws_iam_role_policy_attachment" "autoscaler" {
-  role = aws_iam_role.worker.name
+  role       = aws_iam_role.worker.name
   policy_arn = aws_iam_policy.autoscaler.arn
 }
 
-#Attach role in worker node profile
+# Attach role in worker node profile
 resource "aws_iam_instance_profile" "worker" {
   depends_on = [aws_iam_role.worker]
-  name = "pavan-eks-worker-new-profile"
-  role = aws_iam_role.worker.name
+  name       = "pavan-eks-worker-new-profile"
+  role       = aws_iam_role.worker.name
 }
 
-#data source
+# Data sources
 data "aws_vpc" "main" {
-    tags = {
-      Name = "project-vpc"
-    }
+  tags = {
+    Name = "project-vpc"
+  }
 }
+
 data "aws_subnet" "subnet-1" {
   vpc_id = data.aws_vpc.main.id
   filter {
-    name = "tag:Name"
+    name   = "tag:Name"
     values = ["public-subnet-1"]
   }
 }
+
 data "aws_subnet" "subnet-2" {
   vpc_id = data.aws_vpc.main.id
   filter {
-    name = "tag:Name"
+    name   = "tag:Name"
     values = ["public-subnet-2"]
   }
 }
+
 data "aws_security_group" "selected" {
   vpc_id = data.aws_vpc.main.id
   filter {
-    name = "tag:Name"
+    name   = "tag:Name"
     values = ["project-sg"]
   }
 }
-#Create EKS Cluster
+
+# Create EKS Cluster
 resource "aws_eks_cluster" "eks" {
-  name = "project-eks"
+  name     = "project-eks"
   role_arn = aws_iam_role.master.arn
   vpc_config {
     subnet_ids = [data.aws_subnet.subnet-1.id, data.aws_subnet.subnet-2.id]
@@ -146,42 +161,43 @@ resource "aws_eks_cluster" "eks" {
     aws_iam_role_policy_attachment.AmazonEKSClusterPolicy,
     aws_iam_role_policy_attachment.AmazonEKSServicePolicy,
     aws_iam_role_policy_attachment.AmazonEKSVPCResourceController
-   ]
+  ]
 }
-#Create Node Group
-resource "aws_eks_node_group" "node-grp" {
-    cluster_name = aws_eks_cluster.eks.name
-    node_group_name = "project-group-name"
-    node_role_arn = aws_iam_role.worker.arn
-    subnet_ids = [data.aws_subnet.subnet-1.id, data.aws_subnet.subnet-2.id]
-    capacity_type = "ON_DEMAND"
-    disk_size = 20
-    instance_types = ["t2.medium"]
-    remote_access {
-      ec2_ssh_key = "Practice"
-      source_security_group_ids = [data.aws_security_group.selected.id]
-    }
-    labels = {
-      env = "dev"
-    }
-    scaling_config {
-      desired_size = 2
-      max_size = 4
-      min_size = 1
-    }
-    update_config {
-      max_unavailable = 1
-    }
-    depends_on = [ 
-        aws_iam_role_policy_attachment.AmazonEKSWorkerNodePolicy,
-        aws_iam_role_policy_attachment.AmazonEKS_CNI_Policy,
-        aws_iam_role_policy_attachment.AmazonEC2ContainerRegistryReadOnly,
-    ]
 
+# Create Node Group
+resource "aws_eks_node_group" "node-grp" {
+  cluster_name    = aws_eks_cluster.eks.name
+  node_group_name = "project-group-name"
+  node_role_arn   = aws_iam_role.worker.arn
+  subnet_ids      = [data.aws_subnet.subnet-1.id, data.aws_subnet.subnet-2.id]
+  capacity_type   = "ON_DEMAND"
+  disk_size       = 20
+  instance_types  = ["t2.medium"]
+  remote_access {
+    ec2_ssh_key                = "Practice"
+    source_security_group_ids  = [data.aws_security_group.selected.id]
+  }
+  labels = {
+    env = "dev"
+  }
+  scaling_config {
+    desired_size = 2
+    max_size     = 4
+    min_size     = 1
+  }
+  update_config {
+    max_unavailable = 1
+  }
+  depends_on = [ 
+    aws_iam_role_policy_attachment.AmazonEKSWorkerNodePolicy,
+    aws_iam_role_policy_attachment.AmazonEKS_CNI_Policy,
+    aws_iam_role_policy_attachment.AmazonEC2ContainerRegistryReadOnly
+  ]
 }
+
 # Create OIDC Provider for EKS
 resource "aws_iam_openid_connect_provider" "eks_oidc_provider" {
-  url = "https://oidc.eks.${us-east-1}.amazonaws.com/id/${aws_eks_cluster.eks_cluster.id}"
+  url = "https://oidc.eks.us-east-1.amazonaws.com/id/${aws_eks_cluster.eks.id}"
 
   client_id_list = ["sts.amazonaws.com"]
 
@@ -192,7 +208,7 @@ resource "aws_iam_openid_connect_provider" "eks_oidc_provider" {
 resource "aws_iam_policy" "alb_controller_policy" {
   name        = "ALBControllerPolicy"
   description = "IAM policy for the AWS Load Balancer Controller"
-  policy      = file("alb-controller-policy.json")
+  policy      = file("${path.module}/alb-controller-policy.json")
 }
 
 # Create IAM Role for AWS Load Balancer Controller
@@ -210,7 +226,7 @@ resource "aws_iam_role" "alb_controller_role" {
         Action = "sts:AssumeRoleWithWebIdentity",
         Condition = {
           StringEquals = {
-            "oidc.eks.${us-east-1}.amazonaws.com/id/${aws_eks_cluster.eks_cluster.id}:sub" = "system:serviceaccount:kube-system:aws-load-balancer-controller"
+            "oidc.eks.us-east-1.amazonaws.com/id/${aws_eks_cluster.eks.id}:sub" = "system:serviceaccount:kube-system:aws-load-balancer-controller"
           }
         }
       }
