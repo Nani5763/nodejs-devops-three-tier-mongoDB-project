@@ -6,15 +6,21 @@ metadata:
   annotations:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
-    alb.ingress.kubernetes.io/healthcheck-path: /health
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
 spec:
   ingressClassName: nginx
   rules:
-    - http:
+    - host: bonam.co.in
+      http:
         paths:
-          - 
-            # host: yyy.bonam.co.in
-            path: /
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: api
+                port:
+                  number: 3500
+          - path: /
             pathType: Prefix
             backend:
               service:

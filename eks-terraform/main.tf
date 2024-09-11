@@ -179,7 +179,7 @@ resource "aws_eks_node_group" "node-grp" {
     ]
 
 }
-/*# Create OIDC Provider for EKS
+# Create OIDC Provider for EKS
 resource "aws_iam_openid_connect_provider" "eks_oidc_provider" {
   url = "https://oidc.eks.${us-east-1}.amazonaws.com/id/${aws_eks_cluster.eks_cluster.id}"
 
@@ -222,4 +222,4 @@ resource "aws_iam_role" "alb_controller_role" {
 resource "aws_iam_role_policy_attachment" "alb_controller_policy_attachment" {
   role       = aws_iam_role.alb_controller_role.name
   policy_arn = aws_iam_policy.alb_controller_policy.arn
-}*/
+}
