@@ -2,7 +2,7 @@ provider "aws" {
   region = "us-east-1"
 }
 
-# Create IAM Role for EKS
+# Create IAM Role for EKS Cluster
 resource "aws_iam_role" "master" {
   name = "pavan-eks-master"
 
@@ -20,7 +20,7 @@ resource "aws_iam_role" "master" {
   })
 }
 
-# Attach IAM role Policy for master
+# Attach IAM Role Policies for EKS Cluster
 resource "aws_iam_role_policy_attachment" "AmazonEKSClusterPolicy" {
   role       = aws_iam_role.master.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
@@ -36,7 +36,7 @@ resource "aws_iam_role_policy_attachment" "AmazonEKSVPCResourceController" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
 }
 
-# Create IAM role for worker node
+# Create IAM Role for Worker Nodes
 resource "aws_iam_role" "worker" {
   name = "pavan-eks-worker"
 
@@ -54,7 +54,7 @@ resource "aws_iam_role" "worker" {
   })
 }
 
-# Create IAM policy for autoscaler
+# Create IAM Policy for Autoscaler
 resource "aws_iam_policy" "autoscaler" {
   name = "pavan-eks-autoscaler-policy"
 
@@ -78,7 +78,7 @@ resource "aws_iam_policy" "autoscaler" {
   })
 }
 
-# Attach IAM role policy attachment for worker node
+# Attach IAM Role Policies for Worker Nodes
 resource "aws_iam_role_policy_attachment" "AmazonEKSWorkerNodePolicy" {
   role       = aws_iam_role.worker.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
@@ -109,14 +109,14 @@ resource "aws_iam_role_policy_attachment" "autoscaler" {
   policy_arn = aws_iam_policy.autoscaler.arn
 }
 
-# Attach role in worker node profile
+# Attach IAM Role to Worker Node Profile
 resource "aws_iam_instance_profile" "worker" {
   depends_on = [aws_iam_role.worker]
   name       = "pavan-eks-worker-new-profile"
   role       = aws_iam_role.worker.name
 }
 
-# Data sources
+# Data Sources for VPC, Subnets, and Security Group
 data "aws_vpc" "main" {
   tags = {
     Name = "project-vpc"
@@ -157,14 +157,14 @@ resource "aws_eks_cluster" "eks" {
   tags = {
     Name = "MY_EKS"
   }
-  depends_on = [ 
+  depends_on = [
     aws_iam_role_policy_attachment.AmazonEKSClusterPolicy,
     aws_iam_role_policy_attachment.AmazonEKSServicePolicy,
     aws_iam_role_policy_attachment.AmazonEKSVPCResourceController
   ]
 }
 
-# Create Node Group
+# Create Node Group for EKS Cluster
 resource "aws_eks_node_group" "node-grp" {
   cluster_name    = aws_eks_cluster.eks.name
   node_group_name = "project-group-name"
@@ -188,7 +188,7 @@ resource "aws_eks_node_group" "node-grp" {
   update_config {
     max_unavailable = 1
   }
-  depends_on = [ 
+  depends_on = [
     aws_iam_role_policy_attachment.AmazonEKSWorkerNodePolicy,
     aws_iam_role_policy_attachment.AmazonEKS_CNI_Policy,
     aws_iam_role_policy_attachment.AmazonEC2ContainerRegistryReadOnly
@@ -209,7 +209,6 @@ resource "aws_iam_policy" "alb_controller_policy" {
   name        = "ALBControllerPolicy"
   description = "IAM policy for the AWS Load Balancer Controller"
   policy      = file("${path.module}/alb-controller-policy.json")
-
 }
 
 # Create IAM Role for AWS Load Balancer Controller
@@ -235,7 +234,7 @@ resource "aws_iam_role" "alb_controller_role" {
   })
 }
 
-# Attach IAM policy to AWS Load Balancer Controller Role
+# Attach IAM Policy to AWS Load Balancer Controller Role
 resource "aws_iam_role_policy_attachment" "alb_controller_policy_attachment" {
   role       = aws_iam_role.alb_controller_role.name
   policy_arn = aws_iam_policy.alb_controller_policy.arn
