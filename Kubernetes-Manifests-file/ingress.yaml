@@ -7,12 +7,12 @@ metadata:
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/healthcheck-path: /health
 spec:
-  ingressClassName: nginx
+  ingressClassName: alb
   rules:
     - http:
         paths:
           - 
-            host: www.bonam.co.in
+            #host: www.bonam.co.in
             path: /
             pathType: Prefix
             backend:
